@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Player</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #000000;
+        }
+        .content {
+    display: flex;
+    justify-content: center;
+}
+
+.audio-player {
+    max-width: 400px;
+    padding: 20px;
+    background-color: rgba(28, 28, 28, 0.722);
+    box-shadow: 0 8px 32px 0 rgba(6, 7, 13, 0.2);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    color: #898989;
+    margin-bottom: 20px;
+}
+
+h1 {
+    margin-bottom: 20px;
+    color: #007bff;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+    color: #bebebe;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.button {
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.button:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+.control-button {
+    margin-top: 10px;
+    padding: 8px 16px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.control-button:hover {
+    background-color: #218838;
+    transform: scale(1.05);
+}
+
+.audio-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.audio-controls audio {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.thumbnail {
+    margin-top: 20px;
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 8px;
+    border: 2px solid #007bff;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+}
+
+        canvas#visualizer {
+            width: 100%;
+            height: 60%;
+            margin: 10px auto;
+            display: block;
+            border-radius: 8px;
+            background-color: #000;
+            z-index: -30;
+            position: fixed;
+        }
+
+        @keyframes moveRightToLeft {
+    0% { right: 0; }
+    100% { left: 0; }
+}
+
+@keyframes moveBottomToTop {
+    0% { bottom: 0; }
+    100% { top: 0; }
+}
+
+@keyframes moveBottomLeftToTop {
+    0% { bottom: 0; left: 0; }
+    100% { top: 0; right: 0; }
+}
+
+@keyframes moveBottomRightToLeft {
+    0% { bottom: 0; right: 0; }
+    100% { top: 0; left: 0; }
+}
+        canvas#roundviz {
+    width: 20%;
+    height: 20%;
+    display: block;
+    border-radius: 8px;
+    background-color: #000;
+    z-index: -30;
+    position: fixed;
+    top: 0;
+    right: 0;
+    animation: moverl 10s linear infinite;
+
+}
+canvas#roundviz2 {
+    /* width: 20%; */
+    height: 20%;
+    display: block;
+    border-radius: 8px;
+    background-color: #000;
+    z-index: -30;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    
+     animation: movelr 10s linear infinite;
+}
+
+
+@keyframes moverl {
+    0% {
+        right: 0;
+    }
+    50% {
+        right: calc(100% - 20%);
+    }
+    100% {
+        right: 0;
+    }
+}
+
+@keyframes movelr {
+    0% {
+        left: 0;
+    }
+    50% {
+        left: calc(100% - 20%);
+    }
+    100% {
+        left: 0;
+    }
+}
+
+        .control-button {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .control-button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+        .audio-controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .audio-controls button {
+            margin: 5px;
+        }
+        .controller {
+            display: none;
+        }
+        #songinfo{
+            color: rgb(110, 110, 110);
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <div class="audio-player">
+            <h1>Music Player</h1>
+            <label for="songInput">Enter Song Name:</label>
+            <input type="text" id="songInput" placeholder="Enter song name..." >
+            <!-- <button onclick="fetchAndPlayMusic()" class="button" disabled>Search & Play</button> -->
+            <button onclick="playNextSong()" class="control-button">Next Song</button>
+            
+            <div id="audioControls" class="audio-controls"></div>
+            <img src="" alt="Thumbnail" id="thumbnail" class="thumbnail">
+            <div id="songInfo" class="song-info"></div>
+           
+        </div>
+    </div>
+    <canvas id="visualizer"></canvas>
+    <canvas id ="roundviz"></canvas>
+    <canvas id ="roundviz2"></canvas>
+    <audio id="audioPlayer" class="controller" controls muted></audio>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        let currentSongIndex = 0;
+        let songList = [];
+        let audioContext;
+        let audioSource;
+        let analyser;
+        let dataArray;
+        let canvas;
+        let canvasCtx;
+        let isVisualizerPlaying = true;
+        let visualizerAnimationFrameId;
+
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 512;
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+        async function fetchAndPlayMusic() {
+            const songQuery = document.getElementById('songInput').value.trim();
+            if (!songQuery) {
+                alert('Please enter a song name.');
+                return;
+            }
+
+            try {
+                const response = await axios.get(`https://jio-savaan-private.vercel.app/api/search/songs?query=${songQuery}`);
+                const data = response.data.data;
+                if (data && data.results && data.results.length > 0) {
+                    songList = data.results;
+                    if (Array.isArray(songList) && songList.length > 0) {
+                        const urlToPlay = songList[currentSongIndex].downloadUrl[0].url;
+                        const audioPlayer = document.getElementById('audioPlayer');
+
+                        if (!audioPlayer.paused) {
+                            audioPlayer.pause();
+                        }
+
+                        audioPlayer.src = urlToPlay;
+                        audioPlayer.play();
+
+                        const thumbnailUrl = songList[currentSongIndex].image[0].url;
+                        const thumbnailElement = document.getElementById('thumbnail');
+                        thumbnailElement.src = thumbnailUrl;
+
+                        const songInfoElement = document.getElementById('songInfo');
+                        songInfoElement.innerHTML = `
+                            <p><strong>Song Name:</strong> ${songList[currentSongIndex].name}</p>
+                            <p><strong>Artist:</strong> ${songList[currentSongIndex].label}</p>
+                            <p><strong>Year:</strong> ${songList[currentSongIndex].year}</p>
+                            <p><strong>Language:</strong> ${songList[currentSongIndex].language}</p>
+                            <p><strong>Copyright:</strong> ${songList[currentSongIndex].copyright}</p>
+                            <p><strong>URL:</strong> <a href="${songList[currentSongIndex].url}" target="_blank">Listen on JioSaavn</a></p>
+                        `;
+
+                        audioSource = audioContext.createBufferSource();
+                        audioSource.connect(analyser);
+                        analyser.connect(audioContext.destination);
+
+                        const response = await axios.get(urlToPlay, { responseType: 'arraybuffer' });
+                        const audioData = response.data;
+                        audioContext.decodeAudioData(audioData, (buffer) => {
+                            audioSource.buffer = buffer;
+                            audioSource.start(0);
+                            if (isVisualizerPlaying) {
+                                visualize();
+                                roundvizualizer();
+                                roundvizualizer2();
+                            }
+                        });
+
+                        localStorage.setItem('currentSongUrl', urlToPlay);
+                    } else {
+                        alert('No playable URLs found for this song.');
+                    }
+                } else {
+                    alert('No results found for the query.');
+                }
+            } catch (error) {
+                console.error('Failed to fetch music:', error.message);
+            }
+        }
+
+        function toggleVisualizer() {
+            isVisualizerPlaying = !isVisualizerPlaying;
+            if (isVisualizerPlaying) {
+                visualize();
+                roundvizualizer();
+                roundvizualizer2();
+            } else {
+                cancelAnimationFrame(visualizerAnimationFrameId);
+                canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        function visualize() {
+            canvas = document.getElementById('visualizer');
+            
+        
+            canvasCtx = canvas.getContext('2d');
+          
+
+
+            const WIDTH = canvas.width;
+            const HEIGHT = canvas.height;
+
+            canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
+
+            let colorGroupIndex = 0;
+            const colorGroups = [
+                ['#000', 'blue', 'purple'],
+                ['#000', 'purple', 'pink'],
+                ['#000', 'pink', 'orange'],
+                ['#000', 'orange', 'yellow']
+            ];
+
+            function draw() {
+                visualizerAnimationFrameId = requestAnimationFrame(draw);
+
+                analyser.getByteFrequencyData(dataArray);
+
+                canvasCtx.fillStyle = colorGroups[colorGroupIndex][0];
+                canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+
+                const barWidth = (WIDTH / dataArray.length) * 2.5;
+                let x = 0;
+
+                for (let i = 0; i < dataArray.length; i++) {
+                    const barHeight = dataArray[i];
+
+                    const gradient = canvasCtx.createLinearGradient(0, 0, 0, HEIGHT);
+                    gradient.addColorStop(0, colorGroups[colorGroupIndex][1]);
+                    gradient.addColorStop(1, colorGroups[colorGroupIndex][2]);
+
+                    canvasCtx.fillStyle = gradient;
+                    canvasCtx.fillRect(x, HEIGHT - barHeight / 2, barWidth, barHeight / 2);
+
+                    x += barWidth + 1;
+                }
+            }
+
+            draw();
+
+            setInterval(() => {
+                colorGroupIndex = (colorGroupIndex + 1) % colorGroups.length;
+            }, 5000);
+        }
+
+
+
+        function roundvizualizer() {
+    const canvas = document.getElementById('roundviz');
+    const canvasCtx = canvas.getContext('2d');
+
+    const WIDTH = canvas.width;
+    const HEIGHT = canvas.height;
+
+    canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
+
+    let colorGroupIndex = 0;
+    const colorGroups = [
+        ['#000', 'blue', 'purple'],
+        ['#000', 'purple', 'pink'],
+        ['#000', 'pink', 'orange'],
+        ['#000', 'orange', 'yellow']
+    ];
+
+    function draw() {
+        roundvizAnimationFrameId = requestAnimationFrame(draw);
+
+        analyser.getByteFrequencyData(dataArray);
+
+        canvasCtx.fillStyle = colorGroups[colorGroupIndex][0];
+        canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+
+        const barWidth = (WIDTH / dataArray.length) * 2.5;
+        let x = 0;
+
+        for (let i = 0; i < dataArray.length; i++) {
+            const barHeight = dataArray[i];
+
+            const gradient = canvasCtx.createLinearGradient(0, 0, 0, HEIGHT);
+            gradient.addColorStop(0, colorGroups[colorGroupIndex][1]);
+            gradient.addColorStop(1, colorGroups[colorGroupIndex][2]);
+
+            canvasCtx.fillStyle = gradient;
+            canvasCtx.fillRect(x, HEIGHT - barHeight / 2, barWidth, barHeight / 2);
+
+            x += barWidth + 1;
+        }
+    }
+
+    draw();
+
+    setInterval(() => {
+        colorGroupIndex = (colorGroupIndex + 1) % colorGroups.length;
+    }, 5000);
+}
+function roundvizualizer2() {
+    const canvas = document.getElementById('roundviz2');
+    const canvasCtx = canvas.getContext('2d');
+
+    const WIDTH = canvas.width;
+    const HEIGHT = canvas.height;
+
+    canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
+
+    let colorGroupIndex = 0;
+    const colorGroups = [
+        ['#000', 'blue', 'purple'],
+        ['#000', 'purple', 'pink'],
+        ['#000', 'pink', 'orange'],
+        ['#000', 'orange', 'yellow']
+    ];
+
+    function draw() {
+        roundvizAnimationFrameId = requestAnimationFrame(draw);
+
+        analyser.getByteFrequencyData(dataArray);
+
+        canvasCtx.fillStyle = colorGroups[colorGroupIndex][0];
+        canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+
+        const barWidth = (WIDTH / dataArray.length) * 2.5;
+        let x = 0;
+
+        for (let i = 0; i < dataArray.length; i++) {
+            const barHeight = dataArray[i];
+
+            const gradient = canvasCtx.createLinearGradient(0, 0, 0, HEIGHT);
+            gradient.addColorStop(0, colorGroups[colorGroupIndex][1]);
+            gradient.addColorStop(1, colorGroups[colorGroupIndex][2]);
+
+            canvasCtx.fillStyle = gradient;
+            canvasCtx.fillRect(x, HEIGHT - barHeight / 2, barWidth, barHeight / 2);
+
+            x += barWidth + 1;
+        }
+    }
+
+    draw();
+
+    setInterval(() => {
+        colorGroupIndex = (colorGroupIndex + 1) % colorGroups.length;
+    }, 5000);
+}
+
+
+
+        function toggleAudioMute() {
+            const audioPlayer = document.getElementById('audioPlayer');
+            audioPlayer.muted = !audioPlayer.muted;
+        }
+
+        function playNextSong() {
+            if (currentSongIndex < songList.length - 1) {
+                currentSongIndex++;
+                const urlToPlay = songList[currentSongIndex].downloadUrl[0].url; // Play the first URL
+                const audioPlayer = document.getElementById('audioPlayer');
+
+                // Check if audio is already playing, stop it
+                if (!audioPlayer.paused) {
+                    audioPlayer.pause();
+                }
+
+                audioPlayer.src = urlToPlay;
+                audioPlayer.play();
+                // Update thumbnail
+                const thumbnailUrl = songList[currentSongIndex].image[0].url; // Using the first image URL
+                const thumbnailElement = document.getElementById('thumbnail');
+                thumbnailElement.src = thumbnailUrl;
+                // Update song info
+                const songInfoElement = document.getElementById('songInfo');
+                songInfoElement.innerHTML = `
+                    <p><strong>Song Name:</strong> ${songList[currentSongIndex].name}</p>
+                    <p><strong>Artist:</strong> ${songList[currentSongIndex].label}</p>
+                    <p><strong>Year:</strong> ${songList[currentSongIndex].year}</p>
+                    <p><strong>Language:</strong> ${songList[currentSongIndex].language}</p>
+                    <p><strong>Copyright:</strong> ${songList[currentSongIndex].copyright}</p>
+                    <p><strong>URL:</strong> <a href="${songList[currentSongIndex].url}" target="_blank">Listen on JioSaavn</a></p>
+                `;
+
+                // Disconnect previous audio source if any
+                if (audioSource) {
+                    audioSource.disconnect();
+                }
+                // Create new audio source
+                audioSource = audioContext.createBufferSource();
+                audioSource.connect(analyser);
+                analyser.connect(audioContext.destination);
+
+                // Load and play the audio
+                axios.get(urlToPlay, { responseType: 'arraybuffer' })
+                    .then((response) => {
+                        const audioData = response.data;
+                        audioContext.decodeAudioData(audioData, (buffer) => {
+                            audioSource.buffer = buffer;
+                            audioSource.start(0);
+                            if (isVisualizerPlaying) {
+                                visualize();
+                                roundvizualizer(); // Start visualizer if it's playing
+                                roundvizualizer2();
+                            }
+                        });
+                    })
+                    .catch((error) => {
+                        console.error('Failed to fetch and play music:', error.message);
+                    });
+
+                // Store song URL in local storage
+                localStorage.setItem('currentSongUrl', urlToPlay);
+            } else {
+                alert('No more songs in the playlist.');
+            }
+        
+        }
+    </script>
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fillInputFromLocalStorage();
+        });
+
+        function fillInputFromLocalStorage() {
+            const songInput = document.getElementById('songInput');
+            const storedValue = localStorage.getItem('iwant');
+            if (storedValue) {
+                songInput.value = storedValue;
+                fetchAndPlayMusic();
+            }
+        }
+
+       
+    </script>
+</body>
+</html>

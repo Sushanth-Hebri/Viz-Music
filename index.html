@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Music Search</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #1a1a1a;
+        color: #fff;
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+      }
+      h1.header-line {
+        text-align: center;
+        font-size: 48px;
+        color: #ffa726;
+        background: linear-gradient(to right, #ff7043, #ffab40);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 20px;
+        z-index: 20;
+      }
+      .search-container {
+        z-index: 100;
+        width: 600px;
+        margin-top: 20px;
+        background-color: #3333339f;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.4);
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 36px;
+        color: #ffa726;
+        background: linear-gradient(to right, #ff7043, #ffab40);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      p {
+        color: #bbb;
+        text-align: center;
+        margin-bottom: 10px;
+      }
+      #search {
+        width: 60%;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #555;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+        transition: border-color 0.3s ease;
+        background-color: #444;
+        color: #fff;
+      }
+      #search:focus {
+        border-color: #ffa726;
+      }
+      #suggestions {
+        top: calc(100% + 5px);
+        left: 0;
+        right: 0;
+        background: #555;
+        border: 1px solid #444;
+        border-top: none;
+        max-height: 150px;
+        overflow-y: auto;
+        border-bottom-left-radius: 4px;
+        border-bottom-right-radius: 4px;
+        z-index: 1000;
+      }
+      .suggestion-item {
+        padding: 10px;
+        cursor: pointer;
+        color: #fff;
+      }
+      .suggestion-item:hover {
+        background-color: #777;
+      }
+      #search-button {
+        width: 30%; /* Adjust the width as needed */
+        margin-left: 10px;
+        padding: 10px;
+        font-size: 16px;
+        border: none;
+        border-radius: 4px;
+        background-color: #ffa726;
+        color: #fff;
+        cursor: pointer;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0px 4px 10px rgba(255, 167, 38, 0.4);
+      }
+      #search-button:hover {
+        background-color: #ff7043;
+        box-shadow: 0px 6px 12px rgba(255, 167, 38, 0.6);
+      }
+      .cont {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: url(bg-mus.jpg);
+        background-size: cover;
+      }
+      .rotatedbg {
+        height: 100vh;
+        width: 76vw;
+        position: fixed;
+        right: 0;
+        top: 0;
+        /* background: url(moviebg.jpg); */
+        background-color: #1a1a1a7a;
+        background-size: cover;
+        transform: perspective(2000px) rotateY(-30deg); /* Adjust perspective and rotation angle as needed */
+        transform-origin: right center;
+        z-index: 10;
+      }
+      .rotateleft {
+        height: 100vh;
+        width: 76vw;
+        position: fixed;
+        left: 0;
+        top: 0;
+        background-color: #1a1a1a7a;
+        /* background: url(moviebg.jpg); */
+        background-size: cover;
+        transform: perspective(2000px) rotateY(30deg); /* Adjust perspective and rotation angle as needed */
+        transform-origin: left center;
+        z-index: 10;
+      }
+
+      .row1 {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        height: 50%;
+      }
+      .card {
+        height: 200px;
+        width: 200px;
+        background-color: #463c3c;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.4);
+        object-fit: cover;
+        z-index: 5000;
+      }
+      .card img {
+        height: 100%;
+        width: 100%;
+      }
+      .card:hover{
+        cursor: pointer;
+        transform: scale(1.1);
+        transition: ease-in-out 0.3s;
+      }
+     
+     
+      .topright {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 400px; /* Adjust width as needed */
+            height: 50px; /* Adjust height as needed */
+            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+            color: white;
+            font-size: 16px;
+            padding: 10px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+        }
+
+        .about {
+            width: 70px; /* Adjust width as needed */
+            height: 30px; /* Adjust height as needed */
+            background-color: red;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .about:hover {
+            background-color: darkred;
+        }
+ 
+        /* Hidden content initially positioned off-screen */
+        .about-content {
+            position: fixed;
+            top: 0;
+            right: -420px; /* Initially off-screen */
+            width: 376px; /* Adjust width as needed */
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 20px;
+            z-index: 99999; /* Ensure content appears above the menu */
+            transition: right 0.3s ease; /* Smooth transition for animation */
+        }
+
+        .about-content.show {
+            right: 0; /* Bring content onto the screen */
+        }
+
+        .close-btn {
+            /* position: absolute; */
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            color: white;
+            font-size: 20px;
+        }
+        p{
+            font-size: 1.3rem;
+            line-height: 1.4;
+        }
+        .viz{
+            height: 200px;
+            /* width: 300px; */
+            border-radius: 10px;
+            object-fit: cover;
+        }
+        .viz img{
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+  </head>
+
+  <body>
+   
+    <div class="topright">
+        <div class="about" onclick="toggleAbout()">About</div>
+        <div class="about" onclick="toggleCredits()">Credits</div>
+    </div>
+
+    <!-- About Content -->
+    <div id="aboutContent" class="about-content">
+        <span class="close-btn" onclick="hideContent('aboutContent')">X</span>
+        <h2>About Us</h2>
+        <p>
+            Vizualize Song is a project crafted from scratch with hard work and patience. Our motto is to enhance the user's music experience by providing visual elements that complement the song. It is proven that dance enhances the music experience, so we have incorporated visual bars that synchronize with the rhythm of the song, creating a dynamic and immersive experience for the users.
+        </p>
+        <br>
+        <h3>Our previous work</h3>
+        <div class="viz">
+            <img src="viz.png" alt="">
+        </div>
+    </div>
+
+    <!-- Credits Content -->
+    <div id="creditsContent" class="about-content">
+        <span class="close-btn" onclick="hideContent('creditsContent')">X</span>
+        <h2>Credits</h2>
+        <p>
+            I would like to express my gratitude to JioSaavn for providing the API that powers this project. Additionally, a special thanks to all music owners for their creative work. Please note that all copyrights belong to their respective owners, and this project is intended for demonstration purposes only. There is no intent to monetize or infringe upon any rights.
+        </p>
+        <br><br><br>
+        <h4>Project owned by</h4>Sushanth
+    </div>
+    
+
+
+    <div class="rotateleft">
+      <div class="row1">
+        <div class="card" onclick="cardclicked('thraas akkathi')">
+          <img
+            src="https://c.saavncdn.com/092/Doddmane-Hudga-Kannada-2016-20221104191730-500x500.jpg"
+            alt="thraas akkathi"
+          />
+        </div>
+        <div class="card" onclick="cardclicked('keeping the fire')">
+          <img
+            src="https://i.scdn.co/image/ab67616d0000b27356e7971f6108f64debd16c07"
+            alt="ready xin"
+          />
+        </div>
+        <div class="card" onclick="cardclicked('naiyyo lagda')">
+        <img src="https://c.saavncdn.com/348/Kisi-Ka-Bhai-Kisi-Ki-Jaan-Hindi-2023-20230427184704-500x500.jpg" alt="naiyyo lagda"></div>
+      </div>
+      <div class="row1">
+        <div class="card" onclick="cardclicked('beleiver')">
+        <img src="https://c.saavncdn.com/248/Evolve-English-2017-20180716230950-500x500.jpg" alt="beleiver"></div>
+        <div class="card" onclick="cardclicked('Pushpa-Pushpa')">
+        <img src="https://c.saavncdn.com/601/Pushpa-Pushpa-From-Pushpa-2-The-Rule-Telugu-Telugu-2024-20240501161044-500x500.jpg" alt="pushpa 2"></div>
+        <div class="card" onclick="cardclicked('deva shriganesha')">
+        <img src="https://c.saavncdn.com/317/Agneepath-Hindi-2011-20190603132941-500x500.jpg" alt="deva shri ganesha"></div>
+      </div>
+    </div>
+    <div class="rotatedbg">
+      <div class="row1">
+        <div class="card" onclick="cardclicked('dheera dheera')">
+        <img src="https://c.saavncdn.com/372/KGF-Chapter-1-Kannada-2018-20190318131007-500x500.jpg" alt=""></div>
+        <div class="card" onclick="cardclicked('Jhoome Jo Pathaan')">
+        <img src="https://c.saavncdn.com/807/Pathaan-Hindi-2022-20221222104158-500x500.jpg" alt="Jhoome Jo Pathaan"></div>
+        <div class="card" onclick="cardclicked('naatu naatu')">
+        <img src="https://c.saavncdn.com/592/Naatu-Naatu-From-Rrr--Telugu-2021-20211110131000-500x500.jpg" alt=""></div>
+      </div>
+      <div class="row1">
+        <div class="card" onclick="cardclicked('neenaade naa')">
+        <img src="https://c.saavncdn.com/085/Yuvarathnaa-Kannada-Original-Motion-Picture-Soundtrack-Kannada-2020-20230902104316-500x500.jpg" alt="neenaade naa"></div>
+        <div class="card" onclick="cardclicked('why this kolaveri di')">
+        <img src="https://c.saavncdn.com/104/Why-This-Kolaveri-Di--Tamil-2011-20200428140754-500x500.jpg" alt=""></div>
+        <div class="card" onclick="cardclicked('rowdy baby')">
+        <img src="https://c.saavncdn.com/276/Maari-2-Tamil-2018-20230815210409-500x500.jpg" alt=""></div>
+      </div>
+    </div>
+    <div class="cont">
+      <h1 class="header-line">Visually feel the song</h1>
+      <div class="search-container">
+        <h1>Music Search</h1>
+        <p>Find your favorite songs</p>
+        <input
+          type="text"
+          id="search"
+          placeholder="Search for a song..."
+          autocomplete="off"
+        />
+        <button id="search-button">Search</button>
+        <div id="suggestions"></div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("search");
+        const suggestionsContainer = document.getElementById("suggestions");
+        const searchButton = document.getElementById("search-button");
+
+        // Function to fetch songs from songs2.txt
+        async function fetchSongs() {
+          const response = await fetch("songs2.txt");
+          const data = await response.text();
+          return data
+            .split("\n")
+            .map((song) => song.trim())
+            .filter((song) => song);
+        }
+
+        // Function to filter and display suggestions
+        async function showSuggestions() {
+          const songs = await fetchSongs();
+          const query = searchInput.value.toLowerCase();
+          suggestionsContainer.innerHTML = "";
+          if (query) {
+            const filteredSongs = songs
+              .filter((song) => song.toLowerCase().includes(query))
+              .slice(0, 10);
+            filteredSongs.forEach((song) => {
+              const suggestionItem = document.createElement("div");
+              suggestionItem.classList.add("suggestion-item");
+              suggestionItem.textContent = song;
+              suggestionItem.addEventListener("click", () => {
+                searchInput.value = song;
+                suggestionsContainer.innerHTML = "";
+              });
+              suggestionsContainer.appendChild(suggestionItem);
+            });
+          }
+        }
+
+        // Event listener for input changes
+        searchInput.addEventListener("input", showSuggestions);
+
+        // Event listener for search button click
+        searchButton.addEventListener("click", () => {
+          const query = searchInput.value.trim();
+          if (query) {
+            // Store the query in localStorage
+            localStorage.setItem("iwant", query);
+            // Redirect to hearandviz.html
+            window.location.href = "hearandviz.html";
+          }
+        });
+      });
+
+      function cardclicked(value) {
+        localStorage.setItem("iwant", value);
+        // alert("card clicked"+value);
+        window.location.href = "hearandviz.html";
+      }
+    </script>
+    
+    <script>
+        function toggleAbout() {
+            const aboutContent = document.getElementById('aboutContent');
+            aboutContent.classList.toggle('show');
+        }
+
+        function toggleCredits() {
+            const creditsContent = document.getElementById('creditsContent');
+            creditsContent.classList.toggle('show');
+        }
+
+        function hideContent(contentId) {
+            const content = document.getElementById(contentId);
+            content.classList.remove('show');
+        }
+
+        // Close all content sections when clicking outside
+        window.addEventListener('click', function(event) {
+            const aboutContent = document.getElementById('aboutContent');
+            const creditsContent = document.getElementById('creditsContent');
+            if (!event.target.closest('.about-content') && event.target.closest('.topright') === null) {
+                aboutContent.classList.remove('show');
+                creditsContent.classList.remove('show');
+            }
+        });
+    </script>
+  </body>
+</html>
